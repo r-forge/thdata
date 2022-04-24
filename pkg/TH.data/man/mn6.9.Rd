@@ -18,7 +18,7 @@
 }
 
 \source{
-  McCullagh, P. and Nelder, J.A. (1989, p. 239). \emph{Generalized Linear Models}. Second Edition. Chapman \& Hall/CRC.  
+  McCullagh, P. and Nelder, J.A. (1989, p. 239). \emph{Generalized Linear Models}. Second Edition. Chapman & Hall/CRC.  
 
   copied from multmod package 1.0 (CRAN archive)
 }
