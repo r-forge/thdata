@@ -73,8 +73,7 @@
 	- Estimated mean error 13.9 months using Recurrence Surface
 	Approximation.
 
-   The data are originally available from the UCI machine learning repository, see
-   \url{http://www.ics.uci.edu/~mlearn/databases/breast-cancer-wisconsin/}.
+   The data are originally available from the UCI machine learning repository.
 
 }
 \source{
