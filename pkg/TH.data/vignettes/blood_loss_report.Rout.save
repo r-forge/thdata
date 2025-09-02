@@ -1,0 +1,870 @@
+
+> set.seed(290875)
+
+> load(system.file("rda", "bloodloss.rda", package = "TH.data"))
+
+> library("trtf")
+Loading required package: mlt
+Loading required package: basefun
+Loading required package: variables
+Loading required package: partykit
+Loading required package: grid
+
+Attaching package: ‘grid’
+
+The following object is masked from ‘package:variables’:
+
+    unit
+
+Loading required package: libcoin
+Loading required package: mvtnorm
+Loading required package: tram
+
+> library("tram")
+
+> library("rms")
+Loading required package: Hmisc
+Loading required package: lattice
+Loading required package: survival
+Loading required package: Formula
+Loading required package: ggplot2
+
+Attaching package: ‘ggplot2’
+
+The following object is masked from ‘package:variables’:
+
+    unit
+
+
+Attaching package: ‘Hmisc’
+
+The following objects are masked from ‘package:base’:
+
+    format.pval, units
+
+Loading required package: SparseM
+
+Attaching package: ‘SparseM’
+
+The following object is masked from ‘package:base’:
+
+    backsolve
+
+
+> library("coin")
+
+Attaching package: ‘coin’
+
+The following object is masked from ‘package:variables’:
+
+    support
+
+
+> library("survival")
+
+> library("ATR")
+
+> library("multcomp")
+Loading required package: TH.data
+Loading required package: MASS
+
+Attaching package: ‘TH.data’
+
+The following object is masked from ‘package:MASS’:
+
+    geyser
+
+
+> library("gridExtra")
+
+> library("vcd")
+
+> library("colorspace")
+
+> library("lattice")
+
+> tcols <- diverge_hcl(50, h = c(246, 40), c = 96, l = c(65, 
++     90), alpha = 0.5)
+
+> cols <- qualitative_hcl(3, palette = "Harmonic")
+
+> vR <- paste(R.Version()$major, R.Version()$minor, 
++     sep = ".")
+
+> vtram <- packageDescription("tram")$Version
+
+> vtrtf <- packageDescription("trtf")$Version
+
+> trellis.par.set(list(plot.symbol = list(col = "black", 
++     cex = 0.75), box.rectangle = list(col = 1), box.umbrella = list(lty = 1, 
++     col =  .... [TRUNCATED] 
+Warning in trellis.par.set(list(plot.symbol = list(col = "black", cex = 0.75),  :
+  Note: The default device has been opened to honour attempt to modify trellis settings
+
+> ltheme <- canonical.theme(color = FALSE)
+
+> ltheme$strip.background$col <- "transparent"
+
+> lattice.options(default.theme = ltheme)
+
+> frmt1 <- function(x) formatC(round(x, 1), digits = 1, 
++     format = "f")
+
+> frmt3 <- function(x) {
++     if (!is.numeric(x)) 
++         return(x)
++     formatC(round(x, 3), digits = 3, format = "f")
++ }
+
+> ctrl <- ctree_control(alpha = 0.05, minbucket = 50, 
++     teststat = "max", splitstat = "max", maxsurrogate = 3)
+
+> en <- function(obj, col = "black", bg = "white", fill = "transparent", 
++     ylines = 2, id = TRUE, mainlab = NULL, gp = gpar(), K = 20, 
++     typ .... [TRUNCATED] 
+
+> class(en) <- "grapcon_generator"
+
+> ci <- function(m) {
++     cf <- coef(m)
++     idx <- 1:length(cf)
++     i <- grep("(Intercept)", names(cf))
++     if (length(i) > 0) 
++         idx  .... [TRUNCATED] 
+
+> vlab <- function(x) {
++     lab <- code$desc_EN[code$varname == x]
++     lab <- paste0(toupper(substr(lab, 1, 1)), substr(lab, 2, 
++         nchar(l .... [TRUNCATED] 
+
+> pvar <- function(x) paste(paste(x[-length(x)], collapse = ", "), 
++     ", and ", x[length(x)], sep = "")
+
+> x <- c("GA", "AGE", "MULTIPAR", "BMI", "TWIN", "FET.GEW", 
++     "IOL", "AIS")
+
+> z <- subset(code, type %in% c("confounder", "reason"))$varname
+
+> prae <- c("F1.prae", "F2.prae", "Hb.prae", "F13.Akt.prae")
+
+> vars <- c("MBL", prae, z)
+
+> blood$mode <- with(blood, SECTIO.prim == "yes" | SECTIO.sek == 
++     "yes" | SECTIO.not == "yes") + 1
+
+> blood$mode[blood$SECTIO.sek == "yes" | blood$SECTIO.not == 
++     "yes"] <- 3
+
+> blood$mode <- factor(blood$mode, levels = 1:3, labels = c("Vaginal delivery", 
++     "Planned Cesarean", "Unplanned Cesarean"))
+
+> blood$VCmode <- blood$mode
+
+> levels(blood$VCmode) <- c("Vaginal delivery", "Cesarean Sectio", 
++     "Cesarean Sectio")
+
+> ct <- table(blood$mode)
+
+> frmtnum <- function(x) paste(frmt1(x)[2], " (", paste(frmt1(x)[-2], 
++     collapse = "-"), ")", sep = "")
+
+> frmtrow <- function(x) {
++     if (is.factor(blood[[x]])) 
++         return(table(blood[[x]], blood$mode))
++     prb <- c(0.25, 0.5, 0.75)
++     ret .... [TRUNCATED] 
+
+> tab <- lapply(vars, frmtrow)
+
+> names(tab) <- vars
+
+> desc <- code$desc_EN[match(vars, code$varname)]
+
+> desc <- rep(desc, sapply(tab, nrow))
+
+> desc[dd <- duplicated(desc)] <- ""
+
+> unit <- code$unit[match(vars, code$varname)]
+
+> unit <- gsub("\\%", "\\\\%", unit)
+
+> unit <- gsub("kg/m\\^2", "$\\\\text{kg} / \\\\text{m}^2$", 
++     unit)
+
+> unit <- rep(unit, sapply(tab, nrow))
+
+> unit[dd] <- ""
+
+> unit[is.na(unit)] <- ""
+
+> xtab <- do.call("rbind", tab)
+
+> xtab <- cbind(var = desc, unit = unit, item = rownames(xtab), 
++     xtab)
+
+> writeLines(paste(xtab[, 1], " & ", xtab[, 2], "&", 
++     xtab[, 3], " & ", xtab[, 4], " & ", xtab[, 5], " & ", xtab[, 
++         6], " \\\\"))
+measured blood loss  &  ml & Med (IQR)  &  350.0 (300.0-500.0)  &  500.0 (400.0-600.0)  &  500.0 (400.0-700.0)  \\
+prepartum F. I  &  g/l & missing  &  1  &  2  &  2  \\
+  &   & Med (IQR)  &  4.6 (3.9-5.1)  &  4.3 (3.9-4.8)  &  4.5 (3.9-5.2)  \\
+prepartum F. II  &  \% & missing  &  3  &  2  &  2  \\
+  &   & Med (IQR)  &  128.0 (118.0-140.0)  &  128.0 (115.0-138.0)  &  128.0 (115.0-140.0)  \\
+prepartum hemoglobin  &  g/l & Med (IQR)  &  128.0 (121.0-135.0)  &  124.0 (118.0-131.0)  &  127.0 (120.0-134.0)  \\
+prepartum F. XIII  &  \% & missing  &  3  &  2  &  1  \\
+  &   & Med (IQR)  &  98.5 (86.0-117.8)  &  93.0 (82.0-107.0)  &  93.0 (80.2-111.0)  \\
+number of colloids  &   & Med (IQR)  &  0.0 (0.0-0.0)  &  1.0 (1.0-1.0)  &  1.0 (0.0-1.0)  \\
+spontaneous delivery  &   & no  &  111  &  409  &  223  \\
+  &   & yes  &  566  &  0  &  0  \\
+vacuum delivery  &   & no  &  566  &  409  &  223  \\
+  &   & yes  &  111  &  0  &  0  \\
+elective cesarean delivery  &   & no  &  677  &  0  &  223  \\
+  &   & yes  &  0  &  409  &  0  \\
+unplanned cesarean delivery  &   & no  &  677  &  409  &  13  \\
+  &   & yes  &  0  &  0  &  210  \\
+emergency cesarean delivery  &   & no  &  677  &  409  &  210  \\
+  &   & yes  &  0  &  0  &  13  \\
+gestational age  &  days & Med (IQR)  &  280.0 (273.0-285.0)  &  267.0 (265.0-270.0)  &  277.0 (267.5-284.0)  \\
+maternal age  &  years & Med (IQR)  &  32.0 (29.0-35.0)  &  34.0 (30.0-37.0)  &  33.0 (30.0-36.0)  \\
+multiparity  &   & no  &  367  &  155  &  153  \\
+  &   & yes  &  310  &  254  &  70  \\
+body mass index  &  $\text{kg} / \text{m}^2$ & missing  &  7  &  0  &  1  \\
+  &   & Med (IQR)  &  23.2 (20.5-26.8)  &  25.1 (21.7-28.8)  &  23.4 (21.0-26.4)  \\
+duration of second stage labor  &  min & missing  &  0  &  409  &  179  \\
+  &   & Med (IQR)  &  51.0 (18.0-121.0)  &  NA (NA-NA)  &  172.5 (119.2-206.8)  \\
+multiple fetus pregnancy  &   & no  &  671  &  377  &  210  \\
+  &   & yes  &  6  &  32  &  13  \\
+induction of labor  &   & no  &  414  &  405  &  138  \\
+  &   & yes  &  263  &  4  &  85  \\
+induction of labor $>$ 48 hours  &   & no  &  655  &  408  &  205  \\
+  &   & yes  &  22  &  1  &  18  \\
+chorioamnionitis  &   & no  &  676  &  409  &  214  \\
+  &   & yes  &  1  &  0  &  9  \\
+neonatal weight  &  g/l & Med (IQR)  &  3370.0 (3090.0-3650.0)  &  3200.0 (2890.0-3510.0)  &  3340.0 (2945.0-3690.0)  \\
+uterine rupture  &   & no  &  677  &  409  &  220  \\
+  &   & yes  &  0  &  0  &  3  \\
+uterine atony  &   & no  &  635  &  402  &  219  \\
+  &   & yes  &  42  &  7  &  4  \\
+retained placenta  &   & no  &  653  &  409  &  223  \\
+  &   & yes  &  24  &  0  &  0  \\
+retained placental material  &   & no  &  651  &  408  &  223  \\
+  &   & yes  &  26  &  1  &  0  \\
+morbidly adherent placenta  &   & no  &  676  &  406  &  222  \\
+  &   & yes  &  1  &  3  &  1  \\
+placenta previa  &   & no  &  677  &  400  &  219  \\
+  &   & yes  &  0  &  9  &  4  \\
+bleeding from laceration  &   & no  &  628  &  409  &  223  \\
+  &   & yes  &  49  &  0  &  0  \\
+placental abruption  &   & no  &  675  &  407  &  217  \\
+  &   & yes  &  2  &  2  &  6  \\
+
+> write.csv(xtab, file = "table_1.csv")
+
+> qy <- 0:max(blood$MBL)
+
+> off <- 25
+
+> tm1 <- with(blood, ifelse(MBL < 1000, MBL - off, MBL - 
++     2 * off))
+
+> tm2 <- with(blood, ifelse(MBL >= 1000, MBL + 2 * off, 
++     MBL + off))
+
+> ex <- !blood$MLB %in% seq(from = 100, to = 6000, by = 50)
+
+> stopifnot(sum(ex) == 0)
+
+> tm1[ex] <- blood$MBL[ex] - off/5
+
+> tm2[ex] <- blood$MBL[ex] + off/5
+
+> blood$MBLsurv <- Surv(time = tm1, time2 = tm2, type = "interval2")
+
+> MBLlim <- c(0, 2700)
+
+> nd <- data.frame(mode = sort(unique(blood$mode)))
+
+> if (FALSE) {
++     plot(m <- as.mlt(Colr(MBLsurv | mode ~ 1, data = blood, order = 15, 
++         bounds = c(0, Inf), support = c(250, 2000), extrap .... [TRUNCATED] 
+
+> mvars <- c("Hb.prae", "F1.prae", "F2.prae", "F13.Akt.prae")
+
+> fm <- paste(mvars, collapse = "+")
+
+> m_MBL <- Colr(as.formula(paste("MBLsurv ~ ", fm)), 
++     data = blood, bounds = c(0, Inf), support = c(250, 2000))
+
+> sum(complete.cases(model.frame(m_MBL)))
+[1] 1300
+
+> summary(m_MBL)
+
+  Continuous Outcome Logistic Regression 
+
+Call:
+Colr(formula = as.formula(paste("MBLsurv ~ ", fm)), data = blood, 
+    bounds = c(0, Inf), support = c(250, 2000))
+
+Coefficients:
+              Estimate Std. Error z value Pr(>|z|)    
+Hb.prae       0.009636   0.004621   2.085  0.03704 *  
+F1.prae      -0.060481   0.059033  -1.025  0.30559    
+F2.prae       0.007711   0.002927   2.634  0.00843 ** 
+F13.Akt.prae  0.010854   0.002406   4.511 6.46e-06 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Log-Likelihood:
+ -3696.599 (df = 11)
+Likelihood-ratio Test: Chisq = 34.36389 on 4 degrees of freedom; p = 6.275e-07
+
+
+> logLik(m_MBL)
+'log Lik.' -3696.599 (df=11)
+
+> (ci_all <- ci(m_MBL))
+                          2.5 %   97.5 %
+Hb.prae      1.009682 1.0005795 1.018868
+F1.prae      0.941312 0.8384639 1.056776
+F2.prae      1.007741 1.0019761 1.013538
+F13.Akt.prae 1.010914 1.0061568 1.015693
+
+> (m_MBL_orm <- orm(as.formula(paste("MBL ~ ", fm)), 
++     data = blood))
+Frequencies of Missing Values Due to Each Variable
+         MBL      Hb.prae      F1.prae      F2.prae F13.Akt.prae 
+           0            0            5            7            6 
+
+Logistic (Proportional Odds) Ordinal Regression Model
+ 
+ orm(formula = as.formula(paste("MBL ~ ", fm)), data = blood)
+ 
+ 
+                        Model Likelihood               Discrimination    Rank Discrim.    
+                              Ratio Test                      Indexes          Indexes    
+ Obs          1300    LR chi2      31.17    R2                  0.024    rho     0.156    
+ Distinct Y     39    d.f.             4    R2(4,1300)          0.021                     
+ Median Y      400    Pr(> chi2) <0.0001    R2(4,1275.1)        0.021                     
+ max |deriv| 1e-06    Score chi2   31.22    |Pr(Y>=median)-0.5| 0.157                     
+                      Pr(> chi2) <0.0001                                                  
+ 
+              Coef    S.E.   Wald Z Pr(>|Z|)
+ Hb.prae      -0.0067 0.0046 -1.46  0.1442  
+ F1.prae       0.0608 0.0588  1.03  0.3018  
+ F2.prae      -0.0066 0.0029 -2.28  0.0229  
+ F13.Akt.prae -0.0103 0.0024 -4.29  <0.0001 
+ 
+
+> exp(-coef(m_MBL_orm)["F13.Akt.prae"])
+F13.Akt.prae 
+    1.010382 
+
+> exp(-rev(confint(m_MBL_orm)["F13.Akt.prae", ]))
+  97.5 %    2.5 % 
+1.005629 1.015156 
+
+> m_MBL_C <- Colr(as.formula(paste("MBLsurv | VCmode ~ VCmode:(", 
++     fm, ")")), data = blood, bounds = c(0, Inf), support = c(250, 
++     2000))
+
+> summary(m_MBL_C)
+
+ (Stratified) Continuous Outcome Logistic Regression 
+
+Call:
+Colr(formula = as.formula(paste("MBLsurv | VCmode ~ VCmode:(", 
+    fm, ")")), data = blood, bounds = c(0, Inf), support = c(250, 
+    2000))
+
+Coefficients:
+                                     Estimate Std. Error z value Pr(>|z|)   
+VCmodeVaginal delivery:Hb.prae      -0.006166   0.006618  -0.932  0.35151   
+VCmodeCesarean Sectio:Hb.prae        0.006272   0.006678   0.939  0.34762   
+VCmodeVaginal delivery:F1.prae       0.010058   0.087278   0.115  0.90825   
+VCmodeCesarean Sectio:F1.prae       -0.146799   0.079988  -1.835  0.06647 . 
+VCmodeVaginal delivery:F2.prae       0.002206   0.004099   0.538  0.59044   
+VCmodeCesarean Sectio:F2.prae        0.010655   0.004225   2.522  0.01167 * 
+VCmodeVaginal delivery:F13.Akt.prae  0.009655   0.003327   2.902  0.00371 **
+VCmodeCesarean Sectio:F13.Akt.prae   0.007574   0.003360   2.254  0.02420 * 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Log-Likelihood:
+ -3566.539 (df = 22)
+Likelihood-ratio Test: Chisq = 27.23977 on 8 degrees of freedom; p = 0.0006426
+
+
+> logLik(m_MBL_C)
+'log Lik.' -3566.539 (df=22)
+
+> nd <- blood[1, mvars, drop = FALSE]
+
+> nd[1, ] <- cm <- round(apply(blood[, mvars], 2, median, 
++     na.rm = TRUE), 1)
+
+> F13 <- seq(from = min(blood$F13.Akt.prae, na.rm = TRUE), 
++     to = max(blood$F13.Akt.prae, na.rm = TRUE), length = 25)
+
+> nd <- nd[rep(1, length(F13)), ]
+
+> nd[, "F13.Akt.prae"] <- F13
+
+> nd$MBLsurv <- 500
+
+> X <- model.matrix(as.mlt(m_MBL)$model, data = nd)
+
+> cf <- confint(glht(as.mlt(m_MBL), linfct = X))
+
+> plot(F13, plogis(cf$confint[, "Estimate"], lower.tail = FALSE), 
++     type = "l", ylim = c(0, 1), xlab = "Prepartum F. XIII (%)", 
++     ylab = exp .... [TRUNCATED] 
+
+> lwr <- plogis(cf$confint[, "lwr"], lower.tail = FALSE)
+
+> upr <- plogis(cf$confint[, "upr"], lower.tail = FALSE)
+
+> polygon(c(F13, rev(F13)), c(lwr, rev(upr)), border = NA, 
++     col = "lightblue")
+
+> lines(F13, plogis(cf$confint[, "Estimate"], lower.tail = FALSE))
+
+> rug(blood$F13.Akt.prae, col = rgb(0.1, 0.1, 0.1, 0.1))
+
+> blood$PPH <- factor(blood$MBL >= 500, levels = c(FALSE, 
++     TRUE), labels = c("no", "yes"))
+
+> summary(m_PPH <- lm(F13.Akt.prae ~ PPH, data = blood))
+
+Call:
+lm(formula = F13.Akt.prae ~ PPH, data = blood)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-84.981 -14.954  -2.954  15.019  78.019 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  99.9810     0.8174 122.321  < 2e-16 ***
+PPHyes       -4.0274     1.2230  -3.293  0.00102 ** 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 21.95 on 1301 degrees of freedom
+  (6 observations deleted due to missingness)
+Multiple R-squared:  0.008266,	Adjusted R-squared:  0.007504 
+F-statistic: 10.84 on 1 and 1301 DF,  p-value: 0.001018
+
+
+> confint(m_PPH)["PPHyes", ]
+    2.5 %    97.5 % 
+-6.426666 -1.628115 
+
+> wilcox_test(F13.Akt.prae ~ PPH, data = blood, distribution = approximate(10000), 
++     conf.int = TRUE)
+
+	Approximative Wilcoxon-Mann-Whitney Test
+
+data:  F13.Akt.prae by PPH (no, yes)
+Z = 3.4999, p-value = 8e-04
+alternative hypothesis: true mu is not equal to 0
+95 percent confidence interval:
+ 2 7
+sample estimates:
+difference in location 
+                     4 
+
+
+> tll <- logLik(t_MBL <- Lm(as.formula(paste("MBLsurv ~ ", 
++     fm)), data = blood))
+
+> drll <- logLik(dr_MBL <- Colr(as.formula(paste("MBLsurv | ", 
++     fm, "~ 1")), data = blood, bounds = c(0, Inf), support = c(250, 
++     2000)))
+Warning in model.matrix.box_bases(object = list(iresponse = function (data,  :
+  use scale = TRUE in as.basis.formula with sumcontr = TRUE
+Warning in model.matrix.box_bases(object = list(iresponse = function (data,  :
+  use scale = TRUE in as.basis.formula with sumcontr = TRUE
+Warning in model.matrix.box_bases(object = list(iresponse = function (data,  :
+  use scale = TRUE in as.basis.formula with sumcontr = TRUE
+Warning in model.matrix.box_bases(object = list(iresponse = function (data,  :
+  use scale = TRUE in as.basis.formula with sumcontr = TRUE
+Warning in model.matrix.box_bases(object = list(iresponse = function (data,  :
+  use scale = TRUE in as.basis.formula with sumcontr = TRUE
+
+warning: solve(): system is singular (rcond: 3.10054e-19); attempting approx solution
+
+> nd0 <- data.frame(Hb.prae = 0, F1.prae = 0, F2.prae = 0, 
++     F13.Akt.prae = 0)
+
+> q <- seq(from = MBLlim[1], to = MBLlim[2], length.out = 200)
+
+> p0 <- predict(as.mlt(dr_MBL), newdata = nd0, q = q, 
++     type = "trafo")
+
+> layout(matrix(1:4, ncol = 2))
+
+> for (i in 1:4) {
++     nd <- nd0
++     nd[[i]] <- 1
++     cim <- confint(m_MBL)[i, ]
++     p <- c(predict(as.mlt(dr_MBL), newdata = nd, q = q, type  .... [TRUNCATED] 
+Warning in rug(blood$MBL, col = rgb(0.1, 0.1, 0.1, 0.1)) :
+  some values will be clipped
+Warning in rug(blood$MBL, col = rgb(0.1, 0.1, 0.1, 0.1)) :
+  some values will be clipped
+Warning in rug(blood$MBL, col = rgb(0.1, 0.1, 0.1, 0.1)) :
+  some values will be clipped
+Warning in rug(blood$MBL, col = rgb(0.1, 0.1, 0.1, 0.1)) :
+  some values will be clipped
+
+> lr500 <- glm(as.formula(paste("I(MBL < 500) ~ ", fm)), 
++     data = blood, family = binomial())
+
+> (ci_500 <- ci(lr500))
+Waiting for profiling to be done...
+                          2.5 %   97.5 %
+Hb.prae      1.006913 0.9963915 1.017584
+F1.prae      0.920743 0.8066424 1.050617
+F2.prae      1.008635 1.0018666 1.015536
+F13.Akt.prae 1.008568 1.0030407 1.014182
+
+> lr750 <- glm(as.formula(paste("I(MBL < 750) ~ ", fm)), 
++     data = blood, family = binomial())
+
+> (ci_750 <- ci(lr750))
+Waiting for profiling to be done...
+                           2.5 %   97.5 %
+Hb.prae      1.0033154 0.9887049 1.018054
+F1.prae      0.8671725 0.7250860 1.040850
+F2.prae      1.0159148 1.0063545 1.025727
+F13.Akt.prae 1.0117186 1.0037210 1.019985
+
+> lr1000 <- glm(as.formula(paste("I(MBL < 1000) ~ ", 
++     fm)), data = blood, family = binomial())
+
+> (ci_1000 <- ci(lr1000))
+Waiting for profiling to be done...
+                           2.5 %   97.5 %
+Hb.prae      0.9993749 0.9796098 1.019292
+F1.prae      0.9038357 0.7121563 1.159037
+F2.prae      1.0036128 0.9911707 1.016413
+F13.Akt.prae 1.0101438 0.9994921 1.021260
+
+> p_all <- paste("$", format.pval(summary(m_MBL)$test$test$pvalues, 
++     eps = 0.001), "$")
+
+> p_500 <- paste("$", format.pval(summary(lr500)$coef[-1, 
++     4], eps = 0.001), "$")
+
+> p_750 <- paste("$", format.pval(summary(lr750)$coef[-1, 
++     4], eps = 0.001), "$")
+
+> p_1000 <- paste("$", format.pval(summary(lr1000)$coef[-1, 
++     4], eps = 0.001), "$")
+
+> ci_tab <- rbind(cbind(frmt3(ci_all), p_all), cbind(frmt3(ci_500), 
++     p_500), cbind(frmt3(ci_750), p_750), cbind(frmt3(ci_1000), 
++     p_1000))
+
+> ci_tab <- cbind(c("All", rep("", 3), "500", rep("", 
++     3), "750", rep("", 3), "1000", rep("", 3)), rownames(ci_tab), 
++     ci_tab)
+
+> writeLines(paste(ci_tab[, 1], " & ", ci_tab[, 2], 
++     " & ", ci_tab[, 3], " & ", ci_tab[, 4], " & ", ci_tab[, 5], 
++     " & ", ci_tab[, 6], " \\ ..." ... [TRUNCATED] 
+All  &  Hb.prae  &  1.010  &  1.001  &  1.019  &  $ 0.03704 $  \\
+  &  F1.prae  &  0.941  &  0.838  &  1.057  &  $ 0.30559 $  \\
+  &  F2.prae  &  1.008  &  1.002  &  1.014  &  $ 0.00843 $  \\
+  &  F13.Akt.prae  &  1.011  &  1.006  &  1.016  &  $ < 0.001 $  \\
+500  &  Hb.prae  &  1.007  &  0.996  &  1.018  &  $ 0.19906 $  \\
+  &  F1.prae  &  0.921  &  0.807  &  1.051  &  $ 0.22004 $  \\
+  &  F2.prae  &  1.009  &  1.002  &  1.016  &  $ 0.01279 $  \\
+  &  F13.Akt.prae  &  1.009  &  1.003  &  1.014  &  $ 0.00245 $  \\
+750  &  Hb.prae  &  1.003  &  0.989  &  1.018  &  $ 0.65713 $  \\
+  &  F1.prae  &  0.867  &  0.725  &  1.041  &  $ 0.12179 $  \\
+  &  F2.prae  &  1.016  &  1.006  &  1.026  &  $ 0.00116 $  \\
+  &  F13.Akt.prae  &  1.012  &  1.004  &  1.020  &  $ 0.00446 $  \\
+1000  &  Hb.prae  &  0.999  &  0.980  &  1.019  &  $ 0.95076 $  \\
+  &  F1.prae  &  0.904  &  0.712  &  1.159  &  $ 0.41560 $  \\
+  &  F2.prae  &  1.004  &  0.991  &  1.016  &  $ 0.57442 $  \\
+  &  F13.Akt.prae  &  1.010  &  0.999  &  1.021  &  $ 0.06605 $  \\
+
+> write.csv(ci_tab, file = "table_2.csv")
+
+> ci_tab <- cbind(frmt3(ci(m_MBL_C)), format.pval(summary(m_MBL_C)$test$test$pvalues, 
++     eps = 0.001))
+
+> ci_tab <- cbind(names(coef(m_MBL_C)), ci_tab)
+
+> writeLines(paste(ci_tab[, 1], " & ", ci_tab[, 2], 
++     " & ", ci_tab[, 3], " & ", ci_tab[, 4], " & ", ci_tab[, 5], 
++     " \\\\"))
+VCmodeVaginal delivery:Hb.prae  &  0.994  &  0.981  &  1.007  &  0.35151  \\
+VCmodeCesarean Sectio:Hb.prae  &  1.006  &  0.993  &  1.020  &  0.34762  \\
+VCmodeVaginal delivery:F1.prae  &  1.010  &  0.851  &  1.199  &  0.90825  \\
+VCmodeCesarean Sectio:F1.prae  &  0.863  &  0.738  &  1.010  &  0.06647  \\
+VCmodeVaginal delivery:F2.prae  &  1.002  &  0.994  &  1.010  &  0.59044  \\
+VCmodeCesarean Sectio:F2.prae  &  1.011  &  1.002  &  1.019  &  0.01167  \\
+VCmodeVaginal delivery:F13.Akt.prae  &  1.010  &  1.003  &  1.016  &  0.00371  \\
+VCmodeCesarean Sectio:F13.Akt.prae  &  1.008  &  1.001  &  1.014  &  0.02420  \\
+
+> write.csv(ci_tab, file = "table_3.csv")
+
+> xfm <- paste(x, collapse = "+")
+
+> zfm <- paste(z, collapse = "+")
+
+> xfm_MBL <- as.formula(paste("MBLsurv ~ ", fm, "|", 
++     xfm))
+
+> zfm_MBL <- as.formula(paste("MBLsurv ~ ", fm, "|", 
++     zfm))
+
+> blood$DAUER.ap[is.na(blood$DAUER.ap)] <- 0
+
+> yfm <- as.formula(paste("MBLsurv ~ ", fm))
+
+> xMBL_cc <- complete.cases(blood[, all.vars(yfm)])
+
+> zMBL_cc <- complete.cases(blood[, all.vars(yfm)])
+
+> xitr_MBL <- trafotree(as.mlt(m_MBL), formula = xfm_MBL, 
++     data = blood[xMBL_cc, ], parm = mvars, control = ctrl)
+
+> nodeid <- predict(xitr_MBL, newdata = blood, type = "node")
+
+> blood$nd <- factor(nodeid, levels = sort(unique(nodeid)), 
++     labels = sort(unique(nodeid)))
+
+> m <- Colr(as.formula(paste("MBLsurv | nd ~ nd:(", 
++     fm, ")")), data = blood[xMBL_cc, ], bounds = c(0, Inf), support = c(250, 
++     2000))
+
+> cf <- ci(m)
+
+> cf <- formatC(round(cf, 3), digits = 3, format = "f")
+
+> xitr_MBL$ci <- matrix(paste(matrix(cf[, 2], ncol = 4), 
++     matrix(cf[, 3], ncol = 4), sep = "-"), ncol = 4)
+
+> rownames(xitr_MBL$ci) <- levels(blood$nd)
+
+> plot(rotate(xitr_MBL), terminal_panel = en)
+
+> xn <- tapply(1:nrow(blood), blood$nd, function(i) colMeans(blood[i, 
++     mvars], na.rm = TRUE))
+
+> nd <- as.data.frame(do.call("rbind", xn))
+
+> nd$nd <- sort(unique(blood$nd))
+
+> cb <- confband(as.mlt(m), newdata = nd, type = "distribution", 
++     K = 500, calpha = univariate_calpha())
+
+> data.frame(Subgroup = nd$nd, do.call("rbind", lapply(cb, 
++     function(x) 100 * (1 - x[which.min((x[, "q"] - 500)^2), -1]))))[, 
++     c(1, 2, 4,  .... [TRUNCATED] 
+  Subgroup Estimate      upr      lwr
+1        3 27.59444 23.00023 32.71641
+2        5 26.26938 21.01860 32.29551
+3        6 38.55259 35.43609 41.76588
+4        7 75.44743 62.82150 84.82155
+
+> data.frame(Subgroup = nd$nd, do.call("rbind", lapply(cb, 
++     function(x) 100 * (1 - x[which.min((x[, "q"] - 750)^2), -1]))))[, 
++     c(1, 2, 4,  .... [TRUNCATED] 
+  Subgroup  Estimate       upr      lwr
+1        3  8.255620  5.815348 11.59384
+2        5  7.579202  4.900517 11.54435
+3        6 14.483799 12.321616 16.95204
+4        7 35.717697 24.322851 48.99473
+
+> data.frame(Subgroup = nd$nd, do.call("rbind", lapply(cb, 
++     function(x) 100 * (1 - x[which.min((x[, "q"] - 1000)^2), 
++         -1]))))[, c(1, 2 .... [TRUNCATED] 
+  Subgroup  Estimate      upr       lwr
+1        3  2.879609 1.623289  5.058244
+2        5  3.346504 1.724261  6.395680
+3        6  6.704618 5.248649  8.528120
+4        7 14.270381 7.652079 25.059553
+
+> nd50 <- nd
+
+> nd50$F13.Akt.prae <- nd50$F13.Akt.prae + 50
+
+> cb <- confband(as.mlt(m), newdata = nd50, type = "distribution", 
++     K = 500, calpha = univariate_calpha())
+
+> data.frame(Subgroup = nd$nd, do.call("rbind", lapply(cb, 
++     function(x) 100 * (1 - x[which.min((x[, "q"] - 500)^2), -1]))))[, 
++     c(1, 2, 4,  .... [TRUNCATED] 
+  Subgroup Estimate       upr      lwr
+1        3 19.35138 11.836096 30.01399
+2        5 10.05711  5.151499 18.71256
+3        6 30.59584 23.942955 38.16960
+4        7 66.14726 32.861982 88.63674
+
+> data.frame(Subgroup = nd$nd, do.call("rbind", lapply(cb, 
++     function(x) 100 * (1 - x[which.min((x[, "q"] - 750)^2), -1]))))[, 
++     c(1, 2, 4,  .... [TRUNCATED] 
+  Subgroup  Estimate      upr       lwr
+1        3  5.361702 2.871931  9.792324
+2        5  2.509125 1.098733  5.626964
+3        6 10.634801 7.622620 14.648537
+4        7 26.107388 7.926699 59.183570
+
+> data.frame(Subgroup = nd$nd, do.call("rbind", lapply(cb, 
++     function(x) 100 * (1 - x[which.min((x[, "q"] - 1000)^2), 
++         -1]))))[, c(1, 2 .... [TRUNCATED] 
+  Subgroup Estimate       upr       lwr
+1        3 1.832551 0.8380568  3.960050
+2        5 1.074941 0.4097671  2.789646
+3        6 4.806701 3.2436692  7.067895
+4        7 9.571507 2.3276533 31.978075
+
+> nd <- nd[rep(1:nrow(nd), 2), ]
+
+> nd$type <- gl(2, nrow(nd)/2, labels = c("prepartum F. XIII", 
++     "prepartum F. XIII + 50 units"))
+
+> nd$F13.Akt.prae <- nd$F13.Akt.prae + c(0, 50)[nd$type]
+
+> nd$med <- c(predict(as.mlt(m), newdata = nd, type = "quantile", 
++     prob = 0.5))
+
+> nd$MBL1000 <- (1 - c(predict(as.mlt(m), newdata = nd, 
++     type = "distribution", q = 1000))) * 100
+
+> print(nd)
+     Hb.prae  F1.prae  F2.prae F13.Akt.prae nd                         type
+3   127.1361 4.471297 126.9898     95.78007  3            prepartum F. XIII
+5   126.3650 4.567172 127.8071     99.19192  5            prepartum F. XIII
+6   126.2330 4.534646 128.1524     99.67929  6            prepartum F. XIII
+7   124.3922 4.307647 120.8235     85.56863  7            prepartum F. XIII
+3.1 127.1361 4.471297 126.9898    145.78007  3 prepartum F. XIII + 50 units
+5.1 126.3650 4.567172 127.8071    149.19192  5 prepartum F. XIII + 50 units
+6.1 126.2330 4.534646 128.1524    149.67929  6 prepartum F. XIII + 50 units
+7.1 124.3922 4.307647 120.8235    135.56863  7 prepartum F. XIII + 50 units
+         med   MBL1000
+3   391.5821  2.904307
+5   396.1609  3.366051
+6   442.1992  6.744624
+7   652.0746 14.369377
+3.1 349.0587  1.848440
+5.1 308.1458  1.081368
+6.1 403.7073  4.835970
+7.1 586.0568  9.641572
+
+> qy <- 2:2000
+
+> p <- predict(as.mlt(m), newdata = nd, type = "distribution", 
++     q = qy)
+
+> nd <- nd[rep(1:nrow(nd), each = length(qy)), ]
+
+> nd$MBL <- rep(qy, nrow(nd)/length(qy))
+
+> nd$p <- c(p)
+
+> key <- simpleKey(levels(nd$type), points = FALSE, 
++     lines = TRUE, space = "top", lty = 1)
+
+> key$lines$col <- cols2 <- tcols[c(1, length(tcols))]
+
+> plt <- vector(mode = "list", length = 2)
+
+> pfun <- function(x, y, ...) {
++     panel.abline(v = c(500, 750, 1000), col = "lightgrey")
++     panel.xyplot(x = x, y = y, ...)
++ }
+
+> levels(nd$nd) <- paste("Subgroup", levels(nd$nd))
+
+> plt[[2]] <- xyplot(p ~ MBL | nd, data = nd, groups = type, 
++     type = "l", panel = pfun, key = key, col = cols2, xlab = vlab("MBL"), 
++     ylab  .... [TRUNCATED] 
+
+> plot(plt[[2]])
+
+> zitr_MBL <- trafotree(as.mlt(m_MBL), formula = zfm_MBL, 
++     data = blood[zMBL_cc, ], parm = mvars, control = ctrl)
+
+> blood$nd <- factor(predict(zitr_MBL, newdata = blood, 
++     type = "node"))
+
+> m <- Colr(as.formula(paste("MBLsurv | nd ~ nd:(", 
++     fm, ")")), data = blood[zMBL_cc, ], bounds = c(0, Inf), support = c(250, 
++     2000))
+
+> cf <- ci(m)
+
+> cf <- formatC(round(cf, 3), digits = 3, format = "f")
+
+> zitr_MBL$ci <- matrix(paste(matrix(cf[, 2], ncol = 4), 
++     matrix(cf[, 3], ncol = 4), sep = "-"), ncol = 4)
+
+> rownames(zitr_MBL$ci) <- levels(blood$nd)
+
+> plot(rotate(zitr_MBL), terminal_panel = en)
+
+> sessionInfo()
+R version 4.2.2 (2022-10-31)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Ubuntu 22.04.1 LTS
+
+Matrix products: default
+BLAS:   /usr/local/lib/R/lib/libRblas.so
+LAPACK: /usr/local/lib/R/lib/libRlapack.so
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=de_CH.UTF-8        LC_COLLATE=C              
+ [5] LC_MONETARY=de_CH.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=de_CH.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=de_CH.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] grid      stats     graphics  grDevices utils     datasets  methods  
+[8] base     
+
+other attached packages:
+ [1] colorspace_2.0-3 vcd_1.4-10       gridExtra_2.3    multcomp_1.4-20 
+ [5] TH.data_1.1-1    MASS_7.3-58.1    ATR_0.1-1        coin_1.4-2      
+ [9] rms_6.3-0        SparseM_1.81     Hmisc_4.7-1      ggplot2_3.3.6   
+[13] Formula_1.2-4    survival_3.4-0   lattice_0.20-45  trtf_0.4-0      
+[17] tram_0.8-1       partykit_1.2-16  mvtnorm_1.1-3    libcoin_1.0-9   
+[21] mlt_1.4-4        basefun_1.1-5    variables_1.1-1 
+
+loaded via a namespace (and not attached):
+ [1] splines_4.2.2        assertthat_0.2.1     stats4_4.2.2        
+ [4] latticeExtra_0.6-30  numDeriv_2016.8-1.1  pillar_1.8.1        
+ [7] backports_1.4.1      quantreg_5.94        glue_1.6.2          
+[10] quadprog_1.5-8       alabama_2022.4-1     digest_0.6.30       
+[13] RColorBrewer_1.1-3   checkmate_2.1.0      sandwich_3.0-2      
+[16] htmltools_0.5.3      Matrix_1.5-1         pkgconfig_2.0.3     
+[19] scales_1.2.1         jpeg_0.1-9           MatrixModels_0.5-1  
+[22] tibble_3.1.8         htmlTable_2.4.1      generics_0.1.3      
+[25] withr_2.5.0          nnet_7.3-18          cli_3.4.1           
+[28] magrittr_2.0.3       deldir_1.0-6         polspline_1.1.20    
+[31] fansi_1.0.3          nlme_3.1-160         foreign_0.8-83      
+[34] data.table_1.14.4    tools_4.2.2          matrixStats_0.62.0  
+[37] lifecycle_1.0.3      stringr_1.4.1        interp_1.1-3        
+[40] munsell_0.5.0        cluster_2.1.4        orthopolynom_1.0-6.1
+[43] compiler_4.2.2       inum_1.0-4           rlang_1.0.6         
+[46] rstudioapi_0.14      coneproj_1.16        htmlwidgets_1.5.4   
+[49] base64enc_0.1-3      gtable_0.3.1         codetools_0.2-18    
+[52] DBI_1.1.3            BB_2019.10-1         polynom_1.4-1       
+[55] R6_2.5.1             zoo_1.8-11           knitr_1.40          
+[58] dplyr_1.0.10         fastmap_1.1.0        utf8_1.2.2          
+[61] modeltools_0.2-23    stringi_1.7.8        parallel_4.2.2      
+[64] Rcpp_1.0.9           vctrs_0.5.0          rpart_4.1.19        
+[67] png_0.1-7            lmtest_0.9-40        tidyselect_1.2.0    
+[70] xfun_0.34           
+
+ *** Run successfully completed ***
+> proc.time()
+   user  system elapsed 
+ 10.898   0.307  11.244 
